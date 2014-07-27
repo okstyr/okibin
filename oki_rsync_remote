@@ -8,11 +8,11 @@
 # there:
 #    oki_rsync
 
-rsync_host=10.1.1.2
+rsync_host=10.1.1.115
 rsync_cmd=oki_rsync
 this_host=`hostname`
 # just temporary - should work this out
-user=amuhrer
+user=${oki_user:-oki}
 #maybe this_ip could be established at the remote end using SSH_CLIENT?
 this_ip=`ifconfig eth1|grep 'inet addr'|tr -s ' '|cut -d":" -f2|cut -d' ' -f1`
 
@@ -32,7 +32,7 @@ do
         $cmd
         echo done command
     fi
-done < .oki_rsync_dirs
+done < $HOME/.oki_rsync_dirs
 cmd="ssh oki@$rsync_host $rsync_cmd $this_host snap"
 $cmd
 exit
