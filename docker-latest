@@ -1,0 +1,28 @@
+#!/bin/bash
+# cleans up all tags except latest for all images that match a regex
+fullname=`docker images|egrep "$1"|head -1|cut -d' ' -f1`
+echo $fullname
+
+if [[ -z $fullname ]]; then
+    echo "no $1 images found"
+    exit 1
+fi
+
+docker images |egrep "$1"
+
+declare -a latest
+for i in `docker images |egrep "$1"|grep 'latest'| awk '{print $3}'`; do
+  latest[${#latest}]=$i
+done
+latest_regex=`echo ${latest[*]}|tr ' ' '|'`
+echo "keeping ${latest_regex[*]} and deleting the rest"
+
+if [[ ".$2" == "." ]] ; then
+  echo "not deleting any images till you give me a 'doit'"
+  exit 0
+else
+  for i in `docker images |egrep "$1"|egrep -v "$latest_regex" | awk '{print $3}'|sort|uniq`; do
+    echo "$i"
+    docker rmi $i
+  done
+fi

@@ -1,0 +1,33 @@
+#!/bin/bash
+# regex based docker image deleter
+# not so usefull now that i have the other utils
+
+export safeword=doit
+
+badlist=$1
+if [[ ".$badlist" == "." ]]; then
+  echo 'need to provide pipe separated list of images to delete, or "_all_"'
+  exit 1
+fi
+
+function no_safeword {
+  echo "*** not actually deleting anything until you put a '$safeword' at the end"
+}
+
+if [[ "$badlist" == "_all_" ]] ; then
+  echo "docker images -a |awk '{print $3}'"
+  if [[ ".$2" == ".$safeword" ]] ; then
+    echo "for i in `docker images -a |awk '{print $3}'`; do echo $i; docker rmi -f $i; done"
+  else
+    no_safeword
+  fi
+else
+  docker images -a |egrep "$badlist"
+  if [[ ".$2" == ".$safeword" ]] ; then
+    for i in `docker images -a |egrep "$badlist"|awk '{print $3}'`; do echo $i; docker rmi -f $i; done
+  else
+    no_safeword
+  fi
+fi
+
+

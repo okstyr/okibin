@@ -1,0 +1,7 @@
+#!/bin/bash
+# list running docker containers and their ips
+# if you name them meaningfully it'll be nicer
+for i in `docker ps -q`; do
+  echo -n $i
+  docker inspect --format ' {{ .Name }} {{ .NetworkSettings.IPAddress }}' $i
+done

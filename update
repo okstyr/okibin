@@ -1,0 +1,66 @@
+#!/bin/bash
+# run an update and log it all, leaving only the important stuff on the screen
+export date=`date +%Y%m%d-%H%M%S`
+export logPath="$HOME/branches/log"
+
+#don't let this run except from somewhere under branches dir
+export dirName=`pwd|grep branches|sed -e 's/.*\/branches\(.*\)/\1/'|tr '/' '_'`
+
+if [[ -z $dirName ]]
+then
+    echo 'o noes wrong dir'
+    exit
+fi
+
+# put all the bits together to make the name of the log file
+export logName="$logPath/${dirName}_$date"
+
+echo "writing to $logName"
+
+for i in `ls -d *`
+do
+    if [[ -d $i ]]
+    then
+        if [[ -e "$i/CVS" ]]
+        then
+            echo "======== cvs updating $i" | tee -a $logName
+            cd $i; cvs update 2>&1 | tee -a $logName | egrep '^M|^C' ; cd ..
+        elif [[ -e "$i/.git" ]]
+        then
+            echo "======== git pulling $i" | tee -a $logName
+            cd $i 
+            branch=`git branch|grep '\*'|grep -v '\* master'`
+            if [[ -n "$branch" ]]
+            then
+                branches="$branches$i $branch\n"
+            fi
+            export output=`git pull 2>&1 | tee -a $logName`
+            export goodOutput=`echo "$output"|egrep 'files? changed|Already up-to-date'`
+            if [[ -n "$goodOutput" ]]
+            then
+                echo "SUCCESS"
+                echo "$goodOutput"
+            else
+                echo "FAIL"
+                echo "$output"
+                errorRepos="$errorRepos\n$i"
+            fi
+            cd ..
+        fi
+    fi
+done
+
+echo "========================================"
+if [[ -n "$branches" ]]
+then
+    echo -e "These repos are not on master"
+    echo -e "$branches"
+fi
+if [[ -z "$errorRepos" ]]
+then
+    echo -e "All repos updated successfully"
+else
+    echo -e "There were errors in these repos $errorRepos"
+fi
+
+

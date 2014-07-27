@@ -1,0 +1,8 @@
+#!/bin/bash
+# clean up all the unused docker droppings
+docker rm $(docker ps -a|grep Exited|cut -f1 -d' ') &>/tmp/docker-clean
+for i in `docker images -a|grep '<none>'|awk '{print $3}'`; do
+    echo $i
+    docker rmi $i &
+done &>>/tmp/docker-clean
+echo docker-clean output gone to /tmp/docker-clean

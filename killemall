@@ -1,0 +1,21 @@
+#!/bin/bash
+
+if [[ "$1" == 'killem' ]]
+then
+  killem=1
+  shift
+fi
+
+if [[ -z $killem ]]
+then
+    ps -ef|grep "$@"|egrep -v 'killemall|grep'
+    #for i in `ps -ef|grep "$@"|egrep -v 'killemall|grep' |awk -e '{ print $2 }'` ; do echo $i; done
+    echo include killem to kill
+else
+    echo killing these
+    ps -ef|grep "$@"|egrep -v 'killemall|grep'
+    for i in `ps -ef|grep "$@"|egrep -v 'killemall|grep' |awk -e '{ print $2 }'` ; do echo $i;kill $i; done
+fi
+
+
+
