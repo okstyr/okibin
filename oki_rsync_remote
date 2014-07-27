@@ -1,6 +1,6 @@
 #!/bin/bash
 # oki_rsync_remote
-# fires off a run of oki_rsync on the backup server from this machine
+# fires off a remote run of oki_rsync on the backup server from this machine
 # ingredients
 # here:
 #    this script

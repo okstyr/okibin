@@ -1,0 +1,6 @@
+# cp this file to your $HOME and call it .oki_rsync_dirs
+# then do these 2 steps:
+# mkdir $HOME/oki-test
+# > $HOME/oki-test
+
+$HOME/oki-test
