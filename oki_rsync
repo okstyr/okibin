@@ -16,6 +16,7 @@ then
     exit 1
 fi
 
+source_ip=`echo $SSH_CONNECTION|cut -d' ' -f1`
 rsync_root=/shares/shares1/rsync
 
 echo
@@ -24,7 +25,7 @@ echo ===============================
 
 rsync_dest="$rsync_root/$host/current/"
 mkdir -p $rsync_dest &> /dev/null
-cmd="rsync -av --delete $rsync_source $rsync_dest"
+cmd="rsync -av --delete `eval echo $rsync_source` $rsync_dest"
 echo $cmd
 $cmd
 if [ "$?" -ne "0" ]

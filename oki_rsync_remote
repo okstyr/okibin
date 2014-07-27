@@ -10,11 +10,12 @@
 
 rsync_host=10.1.1.115
 rsync_cmd=oki_rsync
+#rsync_cmd=okitest
 this_host=`hostname`
 # just temporary - should work this out
 user=${oki_user:-oki}
 #maybe this_ip could be established at the remote end using SSH_CLIENT?
-this_ip=`ifconfig eth1|grep 'inet addr'|tr -s ' '|cut -d":" -f2|cut -d' ' -f1`
+#this_ip=`ifconfig eth1|grep 'inet addr'|tr -s ' '|cut -d":" -f2|cut -d' ' -f1`
 
 # get this from .oki_rsync_dirs or optionally override from command line
 #path=/home/oki/rsync_test
@@ -24,17 +25,31 @@ do
     dir=`echo $line|grep -v '^#'`
     if [[ -n $dir ]]
     then
-        cmd="ssh -n oki@$rsync_host $rsync_cmd $this_host $user@$this_ip:$dir"
+        fulldir=`eval echo $dir`
+        echo $dir
+        echo $fulldir
+        #cmd="ssh -n oki@$rsync_host $rsync_cmd $this_host $user@$this_host:$fulldir"
+        cmd="ssh -n oki@$rsync_host bash --login -c '$rsync_cmd $this_host $user@\\\$source_ip:$fulldir'"
         echo
         echo "###################################################################"
         echo syncing - $cmd
         echo "###################################################################"
         $cmd
-        echo done command
+        echo done syncing
     fi
 done < $HOME/.oki_rsync_dirs
-cmd="ssh oki@$rsync_host $rsync_cmd $this_host snap"
+
+# if i do this next line on the command line i have to do it like this...
+# cmd="ssh oki@$rsync_host 'bash --login -c \"$rsync_cmd $this_host snap\"'"
+# why do they work different?
+cmd="ssh oki@$rsync_host bash --login -c \"$rsync_cmd $this_host snap\""
+echo
+echo "###################################################################"
+echo snapping - $cmd
+echo "###################################################################"
 $cmd
+echo done snapping
+
 exit
 
 
