@@ -1,0 +1,57 @@
+#!/bin/bash
+# oki_rsync - rsyncs stuff like a crazy thing
+# this is intended to be called (via ssh) from the machine being backed up
+# via the oki_rsync_remote command
+
+# the name of the machine being backed up
+host=$1
+
+# full ssh path to dir being backed up
+# eg user@10.1.1.1:/home/user/stuff
+rsync_source=$2
+
+if [[ -z $rsync_source ]]
+then
+    echo "oops need hostname and ssh path"
+    exit 1
+fi
+
+rsync_root=/shares/shares1/rsync
+
+echo
+echo "backing up $host $rsync_source"
+echo ===============================
+
+rsync_dest="$rsync_root/$host/current/"
+mkdir -p $rsync_dest &> /dev/null
+cmd="rsync -av --delete $rsync_source $rsync_dest"
+echo $cmd
+$cmd
+if [ "$?" -ne "0" ]
+then
+    echo
+    echo ===============================
+    echo "oops - rsync failed for some reason"
+    exit 1
+fi
+
+
+# now we snapshot it
+echo
+echo "now snapshotting"
+echo ===============================
+snap_source=$rsync_root/$host/current
+now=`date +%Y-%m-%d_%H:%M:%S`
+snap_dest=$rsync_root/$host/$now
+mkdir -p $snap_dest
+snap_cmd="cp -al $snap_source/. $snap_dest/"
+echo $snap_cmd
+$snap_cmd
+if [ "$?" -ne "0" ]
+then
+    echo
+    echo ===============================
+    echo "oops - snapshot failed for some reason"
+    exit 1
+fi
+

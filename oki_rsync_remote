@@ -1,0 +1,41 @@
+#!/bin/bash
+# oki_rsync_remote
+# fires off a run of oki_rsync on the backup server from this machine
+# ingredients
+# here:
+#    this script
+#    .oki_rsync_dirs
+# there:
+#    oki_rsync
+
+rsync_host=10.1.1.2
+rsync_cmd=oki_rsync
+this_host=`hostname`
+# just temporary - should work this out
+user=amuhrer
+#maybe this_ip could be established at the remote end using SSH_CLIENT?
+this_ip=`ifconfig eth1|grep 'inet addr'|tr -s ' '|cut -d":" -f2|cut -d' ' -f1`
+
+# get this from .oki_rsync_dirs or optionally override from command line
+#path=/home/oki/rsync_test
+#for dir in `cat .oki_rsync_dirs|grep -v '^#'`
+while read line
+do
+    dir=`echo $line|grep -v '^#'`
+    if [[ -n $dir ]]
+    then
+        cmd="ssh -n oki@$rsync_host $rsync_cmd $this_host $user@$this_ip:$dir"
+        echo
+        echo "###################################################################"
+        echo syncing - $cmd
+        echo "###################################################################"
+        $cmd
+        echo done command
+    fi
+done < .oki_rsync_dirs
+cmd="ssh oki@$rsync_host $rsync_cmd $this_host snap"
+$cmd
+exit
+
+
+

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# read a var from my simple config file
+config=$HOME/.okirc
+key=$1
+
+cat $config|grep $key|sed -e "s/^$key \(.*\)/\1/"
+
+
