@@ -1,0 +1,8 @@
+#!/bin/bash
+# takes a newline-delimited file and dumb-quotes it to build a string
+# usable in an 'in' clause in mysql
+# eg: echo "select * from my_table where ID in (`sql-join-ids my_file`)|mysql my_db
+
+ids="'"`cat $1`"'"
+echo $ids|sed "s/ /', '/g"
+
