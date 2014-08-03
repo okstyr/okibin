@@ -1,0 +1,12 @@
+
+# See anacron(8) and anacrontab(5) for details.
+SHELL=/bin/bash
+#PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
+
+# These replace cron's entries
+1 5 user.daily nice run-parts --report $HOME/.anacron/cron.daily
+7 10 user.weekly nice run-parts --report $HOME/.anacron/cron.weekly
+
+1 1 backup-bash-history /home/oki/okibin/backup-bash-history
+
+ # eof
