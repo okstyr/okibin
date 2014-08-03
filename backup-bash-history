@@ -1,0 +1,4 @@
+#!/bin/bash
+dir=$HOME/bak/bash_history/
+mkdir -p $dir
+cp $HOME/.bash_history $dir/`date +%F_%T`
