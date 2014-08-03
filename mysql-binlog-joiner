@@ -1,0 +1,32 @@
+#!/usr/bin/ruby
+# built in the middle of an incident, this is in no way polished
+# but its here to not be forgotten
+# puts the query and all its metadata (for a given server) on one line to make grepping easier
+
+@gotone=false
+@block=''
+
+# this file here should be the output of `strings <binlog_name>`
+file = File.new("strings.master", "r")
+while (line = file.gets)
+  if line =~ /server id 25301/
+    puts "--------------- gotone"
+    @gotone=true
+  end
+
+  if @gotone
+    @block="#{@block} #{line.chomp}"
+  end
+
+  if line =~ /^\/\*!\*\/;$/
+    if @gotone
+      puts @block
+      puts "------------------------ end"
+    end
+    @gotone=false
+    @block=''
+  end
+end
+file.close
+
+exit
