@@ -36,6 +36,9 @@ then
     exit 1
 fi
 
+# TODO this must be an old version of the script
+# this needs to be triggered by 'snap' argument
+# like oki_rsync_remote implies
 
 # now we snapshot it
 echo
