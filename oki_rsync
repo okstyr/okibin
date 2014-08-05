@@ -19,6 +19,28 @@ fi
 source_ip=`echo $SSH_CONNECTION|cut -d' ' -f1`
 rsync_root=/shares/shares1/rsync
 
+if [[ "$rsync_source" == "snap" ]] ; then
+    # making an arg sometimes be a switch - yuk
+    echo
+    echo "now snapshotting"
+    echo ===============================
+    snap_source=$rsync_root/$host/current
+    now=`date +%Y-%m-%d_%H:%M:%S`
+    snap_dest=$rsync_root/$host/$now
+    mkdir -p $snap_dest
+    snap_cmd="cp -al $snap_source/. $snap_dest/"
+    echo $snap_cmd
+    $snap_cmd
+    if [ "$?" -ne "0" ]
+    then
+        echo
+        echo ===============================
+        echo "oops - snapshot failed for some reason"
+        exit 1
+    fi
+    exit
+fi
+
 echo
 echo "backing up $host $rsync_source"
 echo ===============================
@@ -36,26 +58,4 @@ then
     exit 1
 fi
 
-# TODO this must be an old version of the script
-# this needs to be triggered by 'snap' argument
-# like oki_rsync_remote implies
-
-# now we snapshot it
-echo
-echo "now snapshotting"
-echo ===============================
-snap_source=$rsync_root/$host/current
-now=`date +%Y-%m-%d_%H:%M:%S`
-snap_dest=$rsync_root/$host/$now
-mkdir -p $snap_dest
-snap_cmd="cp -al $snap_source/. $snap_dest/"
-echo $snap_cmd
-$snap_cmd
-if [ "$?" -ne "0" ]
-then
-    echo
-    echo ===============================
-    echo "oops - snapshot failed for some reason"
-    exit 1
-fi
 
