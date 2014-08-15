@@ -1,0 +1,4 @@
+#!/bin/bash
+# rm all running containers
+
+for i in `docker-ip|cut -f1 -d' '` ; do echo $i; docker rm -f $i & done
