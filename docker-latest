@@ -12,10 +12,10 @@ docker images |egrep "$1"
 
 declare -a latest
 for i in `docker images |egrep "$1"|grep 'latest'| awk '{print $3}'`; do
-  latest[${#latest}]=$i
+  latest[${#latest[*]}]=$i
 done
 latest_regex=`echo ${latest[*]}|tr ' ' '|'`
-echo "keeping ${latest_regex[*]} and deleting the rest"
+echo "keeping ${latest_regex} and deleting the rest"
 
 if [[ ".$2" == "." ]] ; then
   echo "not deleting any images till you give me a 'doit'"
