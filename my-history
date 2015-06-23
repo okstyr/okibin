@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+echo -e "$(cat ~/.mysql_history|sed 's/\\/\\0/g')"
+
