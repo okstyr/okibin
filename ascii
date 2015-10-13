@@ -1,0 +1,6 @@
+#!/bin/bash
+
+for i in {32..255} ; do
+  echo -n "$i "
+  printf " \x$(printf %x $i)\n"
+done
