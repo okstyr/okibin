@@ -1,0 +1,32 @@
+#!/bin/bash
+
+# adds relative pathing to a repos .git/config to include an include file at a couple of different places
+# in the file system. works in a file system that looks like this:
+# ......./projects/grouping_dir/repo_dir
+# include file (called .okigitconfig.include) can be plopped in any of these dirs
+# possibly a little overkill but....
+
+# the reason for this is to stop accidentally posting to github with work id, or my work git with my github id
+# okigitconfig.include looks something like this
+# [user]
+#   name=blah
+#   user=foo@bar.com
+
+git_config='.git/config'
+
+include_head='[include]'
+paths='  path = ..\/..\/..\/.okigitconfig.include\n  path = ..\/..\/.okigitconfig.include\n  path = ..\/.okigitconfig.include'
+# remove any existing okigitconfig lines
+sed -i '/okigitconfig/d' $git_config
+
+# make sure it has one and only one [include]
+if grep -q "\\$include_head" $git_config ; then
+  echo -e '' # nop
+else
+  echo "$include_head" >> $git_config
+fi
+
+# add my paths
+# the backslashes are to escape the first '[' in $include_head
+sed -i "s/\\$include_head/$include_head\n$paths/" $git_config
+
