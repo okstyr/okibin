@@ -51,13 +51,23 @@ image_name=${image_namespace}/${name:?oops \'${file_name}\' looks wrong}
 
 mount_param=
 if [[ `basename $0` == "mymount" ]]; then
-  #mount_param="-v $(pwd):/app"
-  mount_param="-v $(pwd):/root"
+  target_bit=
+  if [[ -e $(pwd)/target ]] ; then
+    # make a off-home-fs location for target because docker/encrypted_fs/scala
+    temp_target=/tmp/target_$container_name # this should be okay - but i might need to unique-ify it - beter still, fold $(pwd) into container name
+    mkdir -p $temp_target
+    target_bit="-v $temp_target:/home/hostuser/target"
+  fi
+  # old mount just for hystorical reasons
+  # mount_param="-v $(pwd):/root"
+  # hostuser and (possibly) target mounts
+  mount_param="-v $(pwd):/home/hostuser $target_bit"
 fi
 
 if [[ "$mode" == "mylaunch" || `basename $0` == "mymount" ]]; then
   # this way i can launch just by tab-completing the file name :)
   docker rm -f $container_name || true
+  echo docker run -it $mount_param --name $container_name ${image_namespace}/${name} bash
   docker run -it $mount_param --name $container_name ${image_namespace}/${name} bash
 else
   echo "building ${image_name}"
