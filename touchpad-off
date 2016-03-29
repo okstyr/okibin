@@ -1,0 +1,9 @@
+#!/bin/bash
+# should make this into a function that toggles
+# once i know whether this state is remembered after reboot
+
+if [[ $(basename $0) == 'touchpad-on' ]] ; then
+  synclient TouchpadOff=0
+else
+  synclient TouchpadOff=1
+fi
