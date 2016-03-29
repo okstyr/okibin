@@ -88,13 +88,14 @@ if [[ `basename $0` == "mymount" ]]; then
     mkdir -p $temp_target
     target_bit="-v $temp_target:/home/${app_user}/target"
   fi
-  # always link homedir to local_libraries to get things like .sbt and .rubies
-  # sooooo ugly but until you can symlink away from dockerdir....
-  ll_bit="-v $HOME:/home/${app_user}/local_libraries"
-  # old mount just for hystorical reasons
-  # mount_param="-v $(pwd):/root"
+  # all the little dot dirs you want to share
+  dotdir_mounts=''
+  for dir in .sbt .ivy2 .m2 .rubies ; do
+    dotdir_bit="-v $HOME/$dir:/home/${app_user}/$dir"
+    dotdir_mounts="$dotdir_mounts $dotdir_bit"
+  done
   # ${app_user} and (possibly) target mounts
-  mount_param="-v $(pwd):/home/${app_user} $target_bit $ll_bit"
+  mount_param="-v $(pwd):/home/${app_user} $target_bit $dotdir_mounts"
 fi
 
 if [[ "$mode" == "mylaunch" || `basename $0` == "mymount" ]]; then
