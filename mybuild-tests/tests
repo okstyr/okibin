@@ -1,0 +1,67 @@
+#!/bin/bash
+
+i1='  '
+i2='    '
+
+
+function evaluate {
+  context="$1"
+  cmd="$2"
+  match="$3"
+  result=$($cmd)
+  echo "${i1}${context}"
+  #echo "$result"
+  if echo "$result"|grep -q "$match" ; then
+    echo "${i2}ok"
+  else
+    echo expected result of "$cmd" to match "$match"
+    echo "${i2}fail"
+    exit 1
+  fi
+}
+
+function withdockerfile {
+  cd withdockerfile
+  echo '======================================================'
+  echo withdockerfile
+  cmd='mybuild --test Dockerfile'
+  evaluate "mybuild container" "$cmd" "container_name oki-mybuild-tests-withdockerfile"
+  evaluate "mybuild image" "$cmd" "image_name oki/mybuild-tests-withdockerfile"
+  cmd='mylaunch --test Dockerfile'
+  evaluate "myload container" "$cmd" "container_name oki-mybuild-tests-withdockerfile"
+  evaluate "myload image" "$cmd" "image_name oki/mybuild-tests-withdockerfile"
+  cd ..
+}
+
+function withdotdockerfile {
+  cd withdotdockerfile
+  echo '======================================================'
+  echo withdotdockerfile
+  cmd='mybuild --test dotdock-test.dockerfile'
+  evaluate "mybuild container" "$cmd" "container_name oki-dotdock-test"
+  evaluate "mybuild image" "$cmd" "image_name oki/dotdock-test"
+  cmd='mylaunch --test dotdock-test.dockerfile'
+  evaluate "myload container" "$cmd" "container_name oki-dotdock-test"
+  evaluate "myload image" "$cmd" "image_name oki/dotdock-test"
+  cd ..
+}
+
+function withoutdockerfile {
+  cd withoutdockerfile
+  echo '======================================================'
+  echo withoutdockerfile
+  cmd='mylaunch --test oki/scala-td'
+  evaluate "myload container" "$cmd" "container_name mybuild-tests-withoutdockerfile-scala-td"
+  evaluate "myload image" "$cmd" "image_name oki/scala-td"
+  cd ..
+}
+
+
+
+
+
+withdockerfile
+withdotdockerfile
+withoutdockerfile
+
+
