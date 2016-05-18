@@ -90,7 +90,7 @@ if [[ `basename $0` == "mymount" ]]; then
   fi
   # all the little dot dirs you want to share
   dotdir_mounts=''
-  for dir in .sbt .ivy2 .m2 .rubies ; do
+  for dir in .sbt .ivy2 .m2 .rubies .gem; do
     dotdir_bit="-v $HOME/$dir:/home/${app_user}/$dir"
     dotdir_mounts="$dotdir_mounts $dotdir_bit"
   done
