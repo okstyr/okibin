@@ -1,66 +1,58 @@
 #!/bin/bash
 # run an update and log it all, leaving only the important stuff on the screen
-export date=`date +%Y%m%d-%H%M%S`
-export logPath="$HOME/branches/log"
+source ~/okibin/colors
 
-#don't let this run except from somewhere under branches dir
-export dirName=`pwd|grep branches|sed -e 's/.*\/branches\(.*\)/\1/'|tr '/' '_'`
+export now=$(date +%F_%T)
+export root_path="$HOME/projects"
+export log_path="$root_path/update_logs"
 
-if [[ -z $dirName ]]
-then
-    echo 'o noes wrong dir'
-    exit
-fi
+mkdir -p $log_path
+export log_name="$log_path/$now"
 
-# put all the bits together to make the name of the log file
-export logName="$logPath/${dirName}_$date"
+echo "writing to $log_name"
 
-echo "writing to $logName"
-
-for i in `ls -d *`
+for i in $(ls -d $root_path/*/*|grep -v $log_path)
 do
-    if [[ -d $i ]]
+  if [[ -e "$i/.git" ]] ; then
+    echo "======== git pulling $i" | tee -a $log_name
+    cd $i 
+    branch=`git branch|grep '\*'|grep -v '\* master'`
+    if [[ -n "$branch" ]]
     then
-        if [[ -e "$i/CVS" ]]
-        then
-            echo "======== cvs updating $i" | tee -a $logName
-            cd $i; cvs update 2>&1 | tee -a $logName | egrep '^M|^C' ; cd ..
-        elif [[ -e "$i/.git" ]]
-        then
-            echo "======== git pulling $i" | tee -a $logName
-            cd $i 
-            branch=`git branch|grep '\*'|grep -v '\* master'`
-            if [[ -n "$branch" ]]
-            then
-                branches="$branches$i $branch\n"
-            fi
-            export output=`git pull 2>&1 | tee -a $logName`
-            export goodOutput=`echo "$output"|egrep 'files? changed|Already up-to-date'`
-            if [[ -n "$goodOutput" ]]
-            then
-                echo "SUCCESS"
-                echo "$goodOutput"
-            else
-                echo "FAIL"
-                echo "$output"
-                errorRepos="$errorRepos\n$i"
-            fi
-            cd ..
-        fi
+      branches="$branches$i $branch\n"
+      echo -e "${RED}FAIL"
+      echo -e "not on master${CSET}"
+      errorRepos="$errorRepos\n$i"
+    else
+      export output=`git pull 2>&1 | tee -a $log_name`
+      export goodOutput=`echo "$output"|egrep 'files? changed|Already up-to-date'`
+      if [[ -n "$goodOutput" ]]
+      then
+        echo -e "${GREEN}SUCCESS"
+        echo -e "${goodOutput}${CSET}"
+      else
+        echo -e "${RED}FAIL"
+        echo -e "${output}${CSET}"
+        errorRepos="$errorRepos\n$i"
+      fi
     fi
+  else
+    echo -e "${BROWN}$i is not a git repo - ignoring${CSET}"
+    echo "$i is not a git repo - ignoring">> $log_name
+  fi
 done
 
 echo "========================================"
 if [[ -n "$branches" ]]
 then
     echo -e "These repos are not on master"
-    echo -e "$branches"
+    echo -e "$branches"|sed -e "s#$root_path##"
 fi
 if [[ -z "$errorRepos" ]]
 then
     echo -e "All repos updated successfully"
 else
-    echo -e "There were errors in these repos $errorRepos"
+    echo -e "There were errors in these repos $errorRepos"|sed -e "s#$root_path##"
 fi
 
 
