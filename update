@@ -8,12 +8,13 @@ export log_path="$root_path/update_logs"
 
 mkdir -p $log_path
 export log_name="$log_path/$now"
+no_update_file=".noupdate"
 
 echo "writing to $log_name"
 
 for i in $(ls -d $root_path/*/*|grep -v $log_path)
 do
-  if [[ -e "$i/.git" ]] ; then
+  if [[ -e "$i/.git" && ! -e "$i/$no_update_file" ]] ; then
     echo "======== git pulling $i" | tee -a $log_name
     cd $i 
     branch=`git branch|grep '\*'|grep -v '\* master'`
