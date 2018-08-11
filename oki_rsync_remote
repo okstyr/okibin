@@ -1,4 +1,6 @@
 #!/bin/bash
+set -euo pipefail
+
 # oki_rsync_remote
 # fires off a remote run of oki_rsync on the backup server from this machine
 # ingredients
@@ -8,7 +10,7 @@
 # there:
 #    oki_rsync
 
-rsync_host=10.1.1.115
+rsync_host=oki-poweredge-1
 rsync_cmd=oki_rsync
 #rsync_cmd=okitest
 this_host=`hostname`
@@ -22,7 +24,7 @@ user=${oki_user:-oki}
 #for dir in `cat .oki_rsync_dirs|grep -v '^#'`
 while read line
 do
-    dir=`echo $line|grep -v '^#'`
+    dir=$(echo $line|grep -v '^#'|| :)
     if [[ -n $dir ]]
     then
         fulldir=`eval echo $dir`

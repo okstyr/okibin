@@ -17,7 +17,7 @@ then
 fi
 
 source_ip=`echo $SSH_CONNECTION|cut -d' ' -f1`
-rsync_root=/shares/shares1/rsync
+rsync_root=/home/shares/shares1/rsync
 
 if [[ "$rsync_source" == "snap" ]] ; then
     # making an arg sometimes be a switch - yuk
