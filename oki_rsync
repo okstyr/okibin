@@ -47,7 +47,7 @@ echo ===============================
 
 rsync_dest="$rsync_root/$host/current/"
 mkdir -p $rsync_dest &> /dev/null
-cmd="rsync -av --delete `eval echo $rsync_source` $rsync_dest"
+cmd="rsync -av --delete `eval echo "$rsync_source"` $rsync_dest"
 echo $cmd
 $cmd
 if [ "$?" -ne "0" ]
