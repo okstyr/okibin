@@ -1,0 +1,132 @@
+#!/bin/bash
+
+# Authenticates and writes the auth token to a file
+#WORK_DIR="/tmp/splunkify-$(date '+%F_%T')"
+WORK_DIR="/tmp/splunkify-test"
+mkdir -p "$WORK_DIR"
+SPLUNK_BASE=https://splunk.skynet.something.com.au:8089
+TOKEN_FILE="$WORK_DIR/token.txt"
+COOKIE_FILE="$WORK_DIR/cookie.txt"
+
+print_row workdir: "$WORK_DIR"
+
+
+print_row() {
+  printf  '%-15s %-10s\n' "$@"
+}
+
+print_cols() {
+  printf '%-16s %12s %13s %13s %15s %5s\n' "$@"
+}
+
+auth_token () {
+  read -p "Enter Username (${USER}): " -r SPLUNK_USERNAME
+  read -p "Password: " -s -r SPLUNK_PASSWORD
+
+  local auth_endpoint="$SPLUNK_BASE/services/auth/login"
+  local credentials=${SPLUNK_USERNAME:="$USER"}:${SPLUNK_PASSWORD}
+  local user="username=$SPLUNK_USERNAME"
+  local pass="password=$SPLUNK_PASSWORD"
+  curl -s -k -c "$COOKIE_FILE" -u "$credentials" "$auth_endpoint" --data-urlencode "cookie=1" --data-urlencode "$user" --data-urlencode "$pass" > "$WORK_DIR/session-key-created.xml"
+  local session_key
+  session_key=$(grep sessionKey "$WORK_DIR/session-key-created.xml" | sed 's/.*<sessionKey>\(.*\)<\/sessionKey>/\1/')
+  if [ -z "$session_key" ]; then
+    echo "Failed to retrieve authenticated session token"
+    echo "Response was:"
+    cat "$WORK_DIR/session-key-created.xml"
+    return 1
+  fi
+  echo "$session_key" > "$TOKEN_FILE"
+  echo "token generated"
+}
+
+load_token () {
+  if [ ! -f "$TOKEN_FILE" ]; then
+    echo -e "No token file found at $TOKEN_FILE"
+    auth_token
+  fi
+  session_token=$(cat "$TOKEN_FILE")
+}
+
+
+submit_search () {
+  load_token
+
+  local query=$1
+  local search_value="search=search $query"
+  local job_creation_url="$SPLUNK_BASE/services/search/jobs"
+
+  curl -s -k -b "$COOKIE_FILE" -c "$COOKIE_FILE" -H "Authorization: Splunk $session_token" "$job_creation_url" --data-urlencode "$search_value" --data-urlencode 'latest=now' \
+                                             --data-urlencode 'output_mode=csv' --data-urlencode "$EARLIEST_VALUE" > "$WORK_DIR/job-created.xml"
+  SID=$(grep sid "$WORK_DIR/job-created.xml" | sed 's/.*<sid>\(.*\)<\/sid>/\1/')
+  if [ -z "$SID" ]; then
+    echo "Failed to retrieve search ID (SID).  Are your credentials wrong?"
+    echo "Response was:"
+    cat "$WORK_DIR/job-created.xml"
+    return 1
+  fi
+
+  print_row search_id "$SID"
+  print_row link: https://splunk.skynet.realestate.com.au/en-GB/app/search/search?sid="$SID"
+  return 0
+}
+
+
+# $OUTPUTFILE, $WORK_DIR, $SPLUNK_BASE
+wait_and_retrieve_search () {
+  load_token
+  OUTPUT_FILE="$WORK_DIR/output"
+  # splunk wants 0 provided to return all the results
+  local ALL_RESULTS_COUNT=50000
+
+  local SID=${1:-$SID}
+  print_row querying "$SID"
+  echo
+
+  print_cols DISPATCH_STATE RUN_DURATION EVENT_COUNT SCAN_COUNT RESULT_COUNT LOOP
+
+
+  for i in {1..500}
+  do
+    curl -s -k -H "Authorization: Splunk $session_token" "$SPLUNK_BASE/services/search/jobs/$SID" > "$WORK_DIR/job-status.xml"
+
+    local dispatch_state
+    local run_duration
+    local result_count
+    local event_count
+    local scan_count
+
+    dispatch_state=$(grep dispatchState "$WORK_DIR/job-status.xml" | sed 's/.*<s:key name=\"dispatchState\">\(.*\)<\/s:key>/\1/')
+    run_duration=$(grep runDuration "$WORK_DIR/job-status.xml" | sed 's/.*<s:key name=\"runDuration\">\(.*\)<\/s:key>/\1/')
+    event_count=$(grep eventCount "$WORK_DIR/job-status.xml" | sed 's/.*<s:key name=\"eventCount\">\(.*\)<\/s:key>/\1/')
+    result_count=$(grep resultCount "$WORK_DIR/job-status.xml" | sed 's/.*<s:key name=\"resultCount\">\(.*\)<\/s:key>/\1/')
+    scan_count=$(grep scanCount "$WORK_DIR/job-status.xml" | sed 's/.*<s:key name=\"scanCount\">\(.*\)<\/s:key>/\1/')
+
+    print_cols "$dispatch_state" "${run_duration%%.*}" "$event_count" "$scan_count" "$result_count" "$i"
+
+    if [ "$dispatch_state" == "DONE" ]; then
+      echo
+      echo "finished - downloading to $OUTPUT_FILE"
+      rm -f "$OUTPUT_FILE"
+      touch "$OUTPUT_FILE"
+
+      local result_pages=$(( result_count/50000 ))
+      echo "result_pages: $result_pages"
+
+      for (( x=0; x<=result_pages; x++ )); do
+        offset=$(( 50000 * x ))
+
+        echo -ne "Offsets[$x]: $offset\r"
+
+        curl --silent -k -b "$COOKIE_FILE" -c "$COOKIE_FILE" -H "Authorization: Splunk $session_token" "$SPLUNK_BASE/services/search/jobs/$SID/results?output_mode=csv&count=$ALL_RESULTS_COUNT&offset=$offset" >> "$OUTPUT_FILE"
+
+      done
+      echo "download to $OUTPUT_FILE complete"
+      return 0
+    fi
+    sleep 0.5
+  done
+  echo "Took too long... giving up.  You can check on the status of the search by clicking the link above."
+  return 1
+}
+

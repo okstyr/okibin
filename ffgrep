@@ -1,0 +1,3 @@
+#!/bin/bash
+
+grep -i --color=always "$1" "$HOME/oki/old-firefox/fullhistory"

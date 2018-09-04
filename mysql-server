@@ -1,0 +1,3 @@
+#!/bin/bash
+
+cd ~/projects && mymount oki/mysql56-td
