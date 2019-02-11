@@ -3,6 +3,5 @@
 # if you name them meaningfully it'll be nicer
 for i in `docker ps -q`; do
   echo -n $i
-  # if you have mangled docker to use !172 then this wont look so nice - soz
-  docker inspect --format ' {{ .Name }} {{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $i |sed 's#^ /# #'|sed -r 's/([0-9])172\./\1 172./g'
+  docker inspect --format ' {{ .Name }} {{range .NetworkSettings.Networks}} {{.IPAddress}}{{end}}' $i |sed 's#^ /# #'
 done |column -t
