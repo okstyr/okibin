@@ -1,0 +1,18 @@
+#!/bin/bash
+
+input_name=${1:?ERROR need a name}
+
+raw_dir=images/raw
+trimmed_dir=images/trimmed
+
+raw_full=$raw_dir/$input_name/
+trimmed_full=$trimmed_dir/$input_name/
+echo will be deleting:
+
+find $raw_full
+find $trimmed_full
+
+echo "are you happy to delete all this? (ctrl-c to abort)"
+read crap
+rm -rf $raw_full
+rm -rf $trimmed_full

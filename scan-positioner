@@ -1,0 +1,14 @@
+#!/bin/bash
+
+name=position-test
+resolution=100
+blurfuzz=30
+blur=$blurfuzz
+fuzz=$blurfuzz
+rm ${name}*
+
+scanimage --device 'brother4:bus2;dev1' --format=png --buffer-size=128 --resolution=$resolution  > $name.png
+
+gm convert $name.png -crop $(convert ${name}.png  -virtual-pixel edge -blur 0x$blur -fuzz $fuzz% -trim -format '%wx%h%O' info:) $name-trimmed.png
+#gm convert $name.png -crop $(gm convert $name.png -virtual-pixel edge -blur 0x$blur -fuzz $fuzz% -trim -format '%wx%h%O' info:-) $name-trimmed.png
+

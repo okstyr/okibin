@@ -1,0 +1,55 @@
+#!/bin/bash
+set -euo pipefail
+
+# scan an photo front and back in different resolutions
+# and plop into a named directory of 'raw' scans
+
+input_name=${1:?ERROR need a name}
+
+dest=images/raw
+mkdir -p $dest
+
+name=$input_name
+# overwrite protection
+inc=''
+while  [[ -d "$dest/$name" ]]
+do
+  let "inc = $inc + 1"
+  name=${input_name}_$inc
+done
+
+mkdir -p $dest/$name
+
+function do_the_scan {
+  path=$1
+  resolution=$2
+  #time scanimage --device 'brother4:bus2;dev1' --format=png --buffer-size=128 --resolution=$res  > $(date +%F_%T).png
+  echo "--- scanning $path"
+  time scanimage --device 'brother4:bus2;dev1' --format=png --buffer-size=128 --resolution=$resolution  > $path
+  sleep 5
+}
+
+function loopem {
+  #for res in 100 300 600 1200
+  # get better results with just a 1200 scan and using graphics magick for the rest
+  for res in 1200
+  do
+    # not writing res in name if only doing one res
+    #full_name=$dest/$name/${name}_${front_or_back}_${res}dpi.png
+    full_name=$dest/$name/${name}_${front_or_back}.png
+    do_the_scan $full_name $res
+  done
+}
+
+front_or_back=front
+
+loopem
+
+echo
+echo -- now flip over to the back and hit enter
+read crap
+
+front_or_back=back
+echo doing back
+loopem
+

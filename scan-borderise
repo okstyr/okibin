@@ -1,0 +1,14 @@
+#!/bin/bash
+set -euo pipefail
+
+# add white border to an image
+# not really done yet
+
+name=position-test
+rm *-bordered*
+
+for color in White
+do
+  echo $color
+  convert $name-trimmed.png -bordercolor $color -border 10 $name-bordered-$color.png
+done

@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# runs:
+# - scan-image  
+#   3-4 mins till it asks you to turn over
+# - scan-trim
+#   x mins
+# - scan resize
+#   x mins
+
+input_name=${1:?ERROR need a name}
+
+echo "-------------------
+scanning $input_name"
+scan-photo $input_name
+echo "-------------------
+trimming scans for $input_name"
+scan-trim $input_name
+echo "-------------------
+resizing $input_name
+scan-resize $input_name

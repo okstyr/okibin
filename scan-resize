@@ -1,0 +1,26 @@
+#!/bin/bash
+
+input_name=${1:?ERROR need a name}
+
+name=$input_name
+
+src=images/trimmed
+dest=$src
+mkdir -p $dest/$name
+
+for source_file in $(ls $src/$name/*[^%].png|sort) ; do
+  # we are not processing anything that matches `%.png` - we dont want to resize our resizes
+  filename=$(basename $source_file)
+  clean_filename=$(echo $filename|sed 's/\.png//')
+
+  echo source: $source_file
+
+  for size in 5 10 20 50; do 
+    dest_file="$src/$name/${clean_filename}_${size}%.png"
+    echo dest: $dest_file
+    time gm convert $source_file -resize $size% +repage $dest_file
+  done
+done
+exit
+
+

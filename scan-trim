@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+
+# takes a bunch of just scanned images (in $src) and trims all the whitespace
+input_name=${1:?ERROR need a name}
+
+name=$input_name
+# overwrite protection
+
+src=images/raw
+dest=images/trimmed
+mkdir -p $dest/$name
+
+blurfuzz=30
+blur=$blurfuzz
+fuzz=$blurfuzz
+
+mkdir -p $dest/$name
+
+for path in $(ls $src/$name/*.png|sort) ; do
+  filename=$(basename $path)
+  echo $path
+  echo $filename
+  time gm convert $path -crop $(gm convert $path -virtual-pixel edge -blur 0x$blur -fuzz $fuzz% -trim -format '%wx%h%O' info:-) -comment "$name" $dest/$name/$filename
+done
