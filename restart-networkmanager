@@ -1,0 +1,6 @@
+#!/bin/bash
+systemctl stop NetworkManager
+sleep 2
+systemctl start NetworkManager
+
+

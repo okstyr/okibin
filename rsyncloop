@@ -1,0 +1,8 @@
+#!/bin/bash
+
+
+for i in $(seq 10) ;
+  do echo -e "\n ============================= $i\n"
+  rsync -av -e "ssh -o MACs=hmac-sha1" . 10.1.1.125:/shares/shares1/rsync/oki-stinkpad-manual/
+  sleep 60
+done

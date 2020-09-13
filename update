@@ -47,13 +47,15 @@ echo "========================================"
 if [[ -n "$branches" ]]
 then
     echo -e "These repos are not on master"
-    echo -e "$branches"|sed -e "s#$root_path##"
+    #echo -e "$branches"|sed -e "s#$root_path##"
+    echo -e "$branches"
 fi
 if [[ -z "$errorRepos" ]]
 then
     echo -e "All repos updated successfully"
 else
-    echo -e "There were errors in these repos $errorRepos"|sed -e "s#$root_path##"
+    #echo -e "There were errors in these repos $errorRepos"|sed -e "s#$root_path##"
+    echo -e "There were errors in these repos $errorRepos"
 fi
 
 

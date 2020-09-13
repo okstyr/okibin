@@ -100,11 +100,11 @@ fi
 
 if [[ "$mode" == "mylaunch" || `basename $0` == "mymount" ]]; then
   # this way i can launch just by tab-completing the file name :)
-  docker rm -f $container_name || true
   cmd="docker run -it $mount_param --name $container_name ${image_name} bash --login"
   if $testing ; then
     echo $cmd
   else
+    docker rm -f $container_name || true
     $cmd
   fi
 else
