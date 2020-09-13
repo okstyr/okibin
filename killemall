@@ -15,6 +15,9 @@ else
     echo killing these
     ps -ef|grep "$@"|egrep -v 'killemall|grep'
     for i in `ps -ef|grep "$@"|egrep -v 'killemall|grep' |awk -e '{ print $2 }'` ; do echo $i;kill $i; done
+    echo pausing before -9
+    sleep 2
+    for i in `ps -ef|grep "$@"|egrep -v 'killemall|grep' |awk -e '{ print $2 }'` ; do echo $i;kill -9 $i; done
 fi
 
 

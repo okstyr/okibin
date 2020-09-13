@@ -27,11 +27,7 @@ do
     dir=$(echo $line|grep -v '^#'|| :)
     if [[ -n $dir ]]
     then
-        fulldir=`eval echo $dir`
-        echo $dir
-        echo $fulldir
-        #cmd="ssh -n oki@$rsync_host $rsync_cmd $this_host $user@$this_host:$fulldir"
-        cmd="ssh -n oki@$rsync_host bash --login -c '$rsync_cmd $this_host $user@\\\$source_ip:$fulldir'"
+        cmd="ssh -n oki@$rsync_host bash --login -c '$rsync_cmd $this_host $user@\\\$source_ip:$dir'"
         echo
         echo "###################################################################"
         echo syncing - $cmd
