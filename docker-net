@@ -1,0 +1,6 @@
+#!/bin/bash
+
+#set -euo pipefail
+
+for i in $(docker network ls|grep -v 'NETWORK ID'|awk '{print $2}') ; do echo $i ; docker inspect $i |jq -r '.[0].Containers |objects[]|"  - \(.Name) \(.IPv4Address)"'|column -t ; done
+

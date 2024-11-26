@@ -82,12 +82,12 @@ fi
 mount_param=
 if [[ `basename $0` == "mymount" ]]; then
   target_bit=
-  if [[ -e $(pwd)/target ]] ; then
-    # make a off-home-fs location for target because docker/encrypted_fs/scala
-    temp_target=/tmp/target_$container_name # this should be okay - but i might need to unique-ify it - beter still, fold $(pwd) into container name
-    mkdir -p $temp_target
-    target_bit="-v $temp_target:/home/${app_user}/target"
-  fi
+#  if [[ -e $(pwd)/target ]] ; then
+#    # make a off-home-fs location for target because docker/encrypted_fs/scala
+#    temp_target=/tmp/target_$container_name # this should be okay - but i might need to unique-ify it - beter still, fold $(pwd) into container name
+#    mkdir -p $temp_target
+#    target_bit="-v $temp_target:/home/${app_user}/target"
+#  fi
   # all the little dot dirs you want to share
   dotdir_mounts=''
   for dir in .sbt .ivy2 .m2 .rubies .gem; do

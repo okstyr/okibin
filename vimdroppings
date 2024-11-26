@@ -1,8 +1,10 @@
 #!/bin/bash
 
 if [[ $1. == doit. ]]; then
-  find . -name '.*.swp' -delete
+  find . -name '.*\.swp' -delete
+  find . -name '.*\.un~' -delete
 else
   echo deleting these if you type doit
-  find . -name '.*.swp'
+  find . -name '.*\.swp'
+  find . -name '.*\.un~'
 fi

@@ -1,7 +1,13 @@
 #!/bin/bash
+set -euo pipefail
 # list running docker containers and their ips
-# if you name them meaningfully it'll be nicer
-for i in `docker ps -q`; do
-  echo -n $i
-  docker inspect --format ' {{ .Name }} {{range .NetworkSettings.Networks}} {{.IPAddress}}{{end}}' $i |sed 's#^ /# #'
-done |column -t
+for i in $(docker ps -q); do
+  if [[ -n "$i" ]]; then
+    name=$(docker inspect "$i" --format ' {{ .Name }}'|sed -r 's#^ */##')
+    ip=$(docker inspect "$i" --format '{{range .NetworkSettings.Networks}} {{.IPAddress}}{{end}}')
+    ports=$(docker inspect --format '{{range $p, $conf := .NetworkSettings.Ports}} {{$p}} {{$conf}} {{end}}' "$i" | \
+      sed -r 's/\/tcp/ ->/g; s/0.0.0.0 //g; s/\[\]/----/g;s/[][{}]//g')
+    echo "$i|$name|$ip|$ports"
+  fi
+done |column -s '|' -t
+

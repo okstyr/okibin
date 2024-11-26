@@ -1,0 +1,22 @@
+#!/bin/bash
+set -e
+# choose randomly from a list
+
+declare -a list
+
+#list=($(grep -v '^#' ~/wheel_data/team))
+mapfile -t list < <(grep -v '^#' ~/wheel_data/team)
+
+echo "choosing from:
+  ${list[*]}"
+
+num=0
+while [[ ".${list[num]}" != "." ]]
+do
+  num=$(( num + 1 ))
+done
+
+rnd=$(( RANDOM % num ))
+
+echo "and the winner is..."
+echo "  ${list[$rnd]}"
