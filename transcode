@@ -1,0 +1,20 @@
+#!/bin/bash
+
+set -euo pipefail
+
+for src in "plerb.xyz" "test - file (yup).mp4" "fenge.webm"; do
+    if echo "$src"|grep -Eq 'mp4' ; then
+       dest=$(echo "$src"|sed -re 's/(.*).mp4$/\1.mp3/')
+       echo "$src"
+       echo "$dest"
+    else
+      echo "$src"
+      echo "not processing"
+    fi
+done
+
+
+
+exit
+
+ffmpeg -i "$source" -vn -acodec libmp3lame -ac 2 -qscale:a 4 -ar 48000 $dest

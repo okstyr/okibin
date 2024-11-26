@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# export passwords to STDOUT
+
+shopt -s nullglob globstar
+prefix=${PASSWORD_STORE_DIR:-$HOME/.password-store}
+
+for file in "$prefix"/**/*.gpg; do
+    file="${file/$prefix\/}"
+    printf '\n%s\n' '-------'
+    printf "%s\n" "Name: ${file%.*}"
+    pass "${file%.*}" 
+done
