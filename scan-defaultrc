@@ -1,0 +1,21 @@
+#!/bin/bash
+# shellcheck disable=SC2034
+set -euo pipefail
+
+# rc file for all my scan-* scripts
+
+device='brother4:bus2;dev6'
+
+images_root=images
+raw=$images_root/raw
+trimmed=$images_root/trimmed
+sized=$images_root/sized
+mkdir -p $raw
+mkdir -p $trimmed
+mkdir -p $sized
+
+# "good enough bluring and fuzzing" maybe override these for the backs?
+blur=20
+fuzz=20
+
+

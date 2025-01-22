@@ -1,25 +1,31 @@
 #!/bin/bash
+# shellcheck disable=SC2086,SC2012,SC2046
 set -euo pipefail
 
-# takes a bunch of just scanned images (in $src) and trims all the whitespace
+# takes a bunch of just scanned images (in $raw) and trims all the whitespace
+source $HOME/scan-defaultrc
+
 input_name=${1:?ERROR need a name}
-
 name=$input_name
-# overwrite protection
 
-src=images/raw
-dest=images/trimmed
-mkdir -p $dest/$name
+src=$raw/$name
+dest=$trimmed/$name
 
-blurfuzz=30
-blur=$blurfuzz
-fuzz=$blurfuzz
+if [[ ! -d $src ]] ; then
+  echo ERROR: $src does not exist
+  exit 1
+fi
 
-mkdir -p $dest/$name
+if [[ -d $dest ]] ; then
+  echo ERROR: $dest already exists
+  exit 1
+fi
 
-for path in $(ls $src/$name/*.png|sort) ; do
+mkdir $dest
+
+for path in $(ls $src/*.png|sort) ; do
   filename=$(basename $path)
   echo $path
   echo $filename
-  time gm convert $path -crop $(gm convert $path -virtual-pixel edge -blur 0x$blur -fuzz $fuzz% -trim -format '%wx%h%O' info:-) -comment "$name" $dest/$name/$filename
+  time magick $path -crop $(magick $path -virtual-pixel edge -blur 0x$blur -fuzz $fuzz% -trim -format '%wx%h%O' info:-) -comment "$name" $dest/$filename
 done

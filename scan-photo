@@ -1,44 +1,38 @@
 #!/bin/bash
+# shellcheck disable=SC2086,SC2046
 set -euo pipefail
 
 # scan an photo front and back in different resolutions
 # and plop into a named directory of 'raw' scans
 
-input_name=${1:?ERROR need a name}
+source $HOME/scan-defaultrc
 
-dest=images/raw
-mkdir -p $dest
+input_name=${1:?ERROR need a name}
 
 name=$input_name
 # overwrite protection
-inc=''
-while  [[ -d "$dest/$name" ]]
-do
-  let "inc = $inc + 1"
-  name=${input_name}_$inc
-done
+if [[ -d $raw/$name ]]; then
+  echo ERROR directory $raw/$name exists, halting
+  exit 1
+fi
 
-mkdir -p $dest/$name
+mkdir -p $raw/$name
 
 function do_the_scan {
   path=$1
   resolution=$2
   #time scanimage --device 'brother4:bus2;dev1' --format=png --buffer-size=128 --resolution=$res  > $(date +%F_%T).png
   echo "--- scanning $path"
-  time scanimage --device 'brother4:bus2;dev1' --format=png --buffer-size=128 --resolution=$resolution  > $path
+  echo "time scanimage --device $device --format=png --buffer-size=128 --resolution=$resolution ."
+  time scanimage --device "$device" --format=png --buffer-size=128 --resolution=$resolution  > $path
   sleep 5
 }
 
 function loopem {
-  #for res in 100 300 600 1200
   # get better results with just a 1200 scan and using graphics magick for the rest
-  for res in 1200
-  do
-    # not writing res in name if only doing one res
-    #full_name=$dest/$name/${name}_${front_or_back}_${res}dpi.png
-    full_name=$dest/$name/${name}_${front_or_back}.png
-    do_the_scan $full_name $res
-  done
+  res=1200
+  full_name=$raw/$name/${name}_${front_or_back}.png
+  do_the_scan $full_name $res
 }
 
 front_or_back=front
@@ -47,6 +41,7 @@ loopem
 
 echo
 echo -- now flip over to the back and hit enter
+# shellcheck disable=SC2162,SC2034
 read crap
 
 front_or_back=back

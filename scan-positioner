@@ -1,14 +1,19 @@
 #!/bin/bash
+# shellcheck disable=SC2086,SC2046
+# no spaces in _my_ filenames
+
+set -euo pipefail
+
+# does a quick thumbnail in $PWD to check position
+source $HOME/scan-defaultrc
 
 name=position-test
 resolution=100
-blurfuzz=30
-blur=$blurfuzz
-fuzz=$blurfuzz
+
 rm ${name}*
+scanimage --device "$device" --format=png --buffer-size=128 --resolution=$resolution  > $name.png
 
-scanimage --device 'brother4:bus2;dev1' --format=png --buffer-size=128 --resolution=$resolution  > $name.png
+echo convert ${name}.png  -virtual-pixel edge -blur $blur -fuzz $fuzz% -trim -format '%wx%h%O' info:
 
-gm convert $name.png -crop $(convert ${name}.png  -virtual-pixel edge -blur 0x$blur -fuzz $fuzz% -trim -format '%wx%h%O' info:) $name-trimmed.png
-#gm convert $name.png -crop $(gm convert $name.png -virtual-pixel edge -blur 0x$blur -fuzz $fuzz% -trim -format '%wx%h%O' info:-) $name-trimmed.png
+magick $name.png -crop $(magick ${name}.png  -virtual-pixel edge -blur $blur -fuzz $fuzz% -trim -format '%wx%h%O' info:) $name-trimmed.png
 

@@ -2,6 +2,10 @@
 
 In order that they should probably be executed
 
+## the rc file
+`ln -s $PWD/scan-defaultrc $HOME/scan-defaultrc`
+or if you just want to make local changes, do a `cp` instead
+
 ## scan-positioner
 takes a quick scan and trims it to see if its positioned right
 uses `convert` instead of `gm convert` so trimming may behave diffreently
